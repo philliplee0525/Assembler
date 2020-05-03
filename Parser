@@ -1,0 +1,152 @@
+import java.io.*;
+import java.util.ArrayList;
+
+/**
+ * Phillip Lee
+ */
+public class Parser {
+    private String strCurrCmd;
+    private int command = 0;
+    private ArrayList<String> strInstructions = new ArrayList<>();
+    private boolean bFirst = true;
+
+    public Parser(String fileName) {
+        try (FileReader fr = new FileReader(fileName)) {
+            BufferedReader reader = new BufferedReader(fr);
+            String strTemp;
+            while ((strTemp = reader.readLine()) != null) {
+                String strCommand = stripWhiteSpace(strTemp);
+                if (!strCommand.equals("")) {
+                    strInstructions.add(strCommand);
+                }
+            }
+
+            fr.close();
+            reader.close();
+
+
+        } catch (FileNotFoundException e)
+
+        {
+            e.printStackTrace();
+        } catch (IOException e)
+
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    public int getCommand() {
+        return Command;
+    }
+
+    public void setCommand(int Command) {
+        this.Command = Command;
+    }
+
+
+    public void removeInstruction(int index) {
+        strInstructions.remove(index);
+    }
+
+    public String getStrCurrCmd() {
+        return strCurrCmd;
+    }
+
+    public String stripWhiteSpace(String strCommand) {
+        String strWhiteSpace = strCommand;
+        if (!strWhiteSpace.equals("") && strWhiteSpace.contains("//")) {
+            int nOffSet = strWhiteSpace.indexOf("//");
+            strWhiteSpace = strWhiteSpace.substring(0, nOffSet).trim();
+        }
+        if (!strWhiteSpace.equals("")) {
+            strWhiteSpace = strWhiteSpace.trim().replaceAll("\\s", "");
+        }
+        return strWhiteSpace;
+
+    }
+
+    public boolean hasMoreCommands() {
+        boolean hasMore = false;
+        if (Command + 1 < strInstructions.size() || (Command == 0 && strInstructions.size() >= 1)) {
+            hasMore = true;
+        }
+        return hasMore;
+
+    }
+
+    public void advance() {
+        if (bFirst == true) {
+            strCurrCmd = strInstructions.get(Command);
+            bFirst = false;
+        } else {
+            Command++;
+            strCurrCmd = strInstructions.get(Command);
+        }
+    }
+
+    public void reset() {
+        strCurrCmd = strInstructions.get(0);
+        Command = 0;
+        bFirst = true;
+    }
+
+    public String commandType() {
+        String strType;
+        if (strCurrCmd.charAt(0) == '@') {
+            strType = "A_COMMAND";
+        } else if (strCurrCmd.charAt(0) == '(') {
+            strType = "L_COMMAND";
+        } else {
+            strType = "C_COMMAND";
+        }
+        return strType;
+    }
+
+    public String symbol() {
+        return strCurrCmd.substring(1);
+    }
+
+    public String dest() {
+        String dest;
+        if (strCurrCmd.contains("=")) {
+            int nIndex = strCurrCmd.indexOf("=");
+            dest = strCurrCmd.substring(0, nIndex);
+        } else {
+            dest = "null";
+        }
+        return dest;
+    }
+
+    public String comp() {
+        String strComp;
+        if (strCurrCmd.contains("=") && strCurrCmd.contains(";")) {
+            int nEquals = strCurrCmd.indexOf("=");
+            int nSemi = strCurrCmd.indexOf(";");
+            strComp = strCurrCmd.substring(nEquals + 1, nSemi);
+        } else if (strCurrCmd.contains("=")) {
+            int nEquals = strCurrCmd.indexOf("=");
+            strComp = strCurrCmd.substring(nEquals + 1);
+        } else if (strCurrCmd.contains(";")) {
+            int nSemi = strCurrCmd.indexOf(";");
+            strComp = strCurrCmd.substring(0, nSemi);
+        } else {
+            return "Invalid";
+        }
+        return strComp;
+    }
+
+    public String jump() {
+        String strJump;
+        if (strCurrCmd.contains(";")) {
+            int nSemi = strCurrCmd.indexOf(";");
+            strJump = strCurrCmd.substring(nSemi + 1);
+        } else {
+            strJump = "null";
+        }
+        return strJump;
+    }
+
+
+}
